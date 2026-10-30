@@ -1,0 +1,47 @@
+{
+  "name": "trellis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Project notes as small atoms in a weighted 3D graph, saved automatically by Claude and ChatGPT.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch --ignore src/web src/server/index.ts",
+    "build": "vite build && tsc -p tsconfig.server.json && node scripts/copy-migrations.mjs",
+    "start": "NODE_ENV=production node dist/server/index.js",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "node test/e2e/run.mjs",
+    "mcp:stdio": "node dist/server/stdio-bridge.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@simplewebauthn/server": "^14.0.3",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.2",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "3d-force-graph": "^1.80.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "three": "^0.187.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

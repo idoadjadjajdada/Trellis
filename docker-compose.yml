@@ -1,0 +1,44 @@
+# The local version: the same app as the hosted one, with Postgres + pgvector in Docker.
+#   docker compose up -d     then open http://localhost:3000
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: trellis
+      POSTGRES_PASSWORD: trellis
+      POSTGRES_DB: trellis
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trellis -d trellis"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build: .
+    image: trellis
+    # A fixed name, so Claude Desktop can reach the stdio bridge with `docker exec -i trellis ...`.
+    container_name: trellis
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://trellis:trellis@db:5432/trellis
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-local}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ALLOW_SIGNUP: ${ALLOW_SIGNUP:-true}
+      TRUST_PROXY: ${TRUST_PROXY:-}
+    ports:
+      # Only reachable from this computer. Use a tunnel to expose it (see README).
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - models:/models
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  models:
