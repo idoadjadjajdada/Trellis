@@ -43,7 +43,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (!Number.isInteger(port) || port <= 0 || port > 65535) throw new Error(`Invalid PORT: ${env.PORT}`);
 
   const databaseUrl = env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/trellis';
-  const publicUrl = new URL(env.PUBLIC_URL ?? `http://localhost:${port}`);
+  // Hosts that announce their own public address: Render, Railway.
+  const platformUrl =
+    env.RENDER_EXTERNAL_URL || (env.RAILWAY_PUBLIC_DOMAIN ? `https://${env.RAILWAY_PUBLIC_DOMAIN}` : undefined);
+  const publicUrl = new URL(env.PUBLIC_URL || platformUrl || `http://localhost:${port}`);
   if (publicUrl.pathname !== '/' || publicUrl.search || publicUrl.hash) {
     throw new Error('PUBLIC_URL must be an origin with no path, e.g. https://trellis.example.com');
   }
