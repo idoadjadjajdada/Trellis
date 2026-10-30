@@ -1,33 +1,32 @@
 # Render Blueprint: the Trellis app (Docker) plus Postgres with pgvector.
-# Deploy: Render Dashboard → New → Blueprint → pick this repo, or use the button in the README.
+# Deploy: Render Dashboard → New → Blueprint → pick this repo.
 # The app finds its public address from RENDER_EXTERNAL_URL. If you add a custom domain,
-# set PUBLIC_URL to it BEFORE creating your account (passkeys are tied to the host name).
+# add PUBLIC_URL in the Dashboard BEFORE creating your account (passkeys are tied to the host name).
+# After you create your account, add ALLOW_SIGNUP=false in the Dashboard. It is left out of this
+# file on purpose: a value here would turn signups back on at every Blueprint sync.
 services:
   - type: web
     name: trellis
     runtime: docker
-    # starter does not sleep, so AI connectors never hit a cold start. The app peaks
+    # Paid plans do not sleep, so AI connectors never hit a cold start. The app peaks
     # around 380 MB with the embedding model loaded, so do not go below 512 MB of RAM.
-    plan: starter
+    plan: 0.5c-512mb
     healthCheckPath: /healthz
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: trellis-db
           property: connectionString
+      # Proxy hops in front of the app, so rate limits see the real client IP. "true" would
+      # let anyone dodge them with a fake X-Forwarded-For header.
       - key: TRUST_PROXY
-        value: "true"
+        value: "3"
       - key: EMBEDDING_PROVIDER
         value: local
-      # Turn this to "false" in the Dashboard after you create your account.
-      - key: ALLOW_SIGNUP
-        value: "true"
-      - key: PUBLIC_URL
-        sync: false
 
 databases:
   - name: trellis-db
-    plan: basic-256mb
+    plan: 0.1c-256mb
     databaseName: trellis
     user: trellis
     postgresMajorVersion: "16"

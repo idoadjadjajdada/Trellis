@@ -24,7 +24,7 @@ open http://localhost:3000
 
 Create an account with a passkey, save the recovery codes, then go to **Settings → Connect an AI**.
 
-The first start downloads the embedding model (about 130 MB) into a Docker volume. Notes can be saved once that finishes (a few seconds to a minute).
+The image build downloads the embedding model (about 130 MB), so it ships with the app.
 
 The app listens on `127.0.0.1:3000` only. Data lives in the `pgdata` volume. To back up: `docker compose exec db pg_dump -U trellis trellis > trellis.sql`.
 
@@ -80,11 +80,11 @@ Trellis is a single Node process plus Postgres with pgvector.
 | `MODEL_CACHE_DIR` | | Where the local model is downloaded. |
 | `LOCAL_MODEL_PATH` | | A folder with pre-downloaded models; nothing is downloaded when set. |
 | `ALLOW_SIGNUP` | `true` | Set `false` to stop new accounts. |
-| `TRUST_PROXY` | loopback only | Set `true` (or the number of hops) behind a reverse proxy, so rate limits see real client IPs. |
+| `TRUST_PROXY` | loopback only | Set the number of proxy hops behind a reverse proxy, so rate limits see real client IPs. `true` also works, but anyone can then dodge rate limits with a fake `X-Forwarded-For`. |
 
 ```bash
 docker build -t trellis .
-docker run -p 3000:3000 -e PUBLIC_URL=https://trellis.example.com -e DATABASE_URL=... -e TRUST_PROXY=true trellis
+docker run -p 3000:3000 -e PUBLIC_URL=https://trellis.example.com -e DATABASE_URL=... -e TRUST_PROXY=1 trellis
 ```
 
 Migrations run automatically on start (guarded by an advisory lock, so several instances can start at once). The server is stateless apart from Postgres, so you can run more than one instance.
